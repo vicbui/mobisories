@@ -9,8 +9,11 @@
 	<body>
 		<h1> Mobisories says </h1>
 		{{bold_message}}<br>
-		<img src ="{% static 'dreamCatcher.jpg' %}" alt = "dream"/>
-
+		{% if entities  %}
+			{% for entity in entities %}
+				<a href ='/entites/{{entity.id}}'>{{entity.name}} </a> <br>
+			{% endfor %}
+		{% endif %}
 	</body>
 
 </html>

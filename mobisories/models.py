@@ -12,6 +12,10 @@ class Product(models.Model):
 	picture = models.ImageField(upload_to='product_images', blank=True)
 
 
+	def get_collectors(self,action):
+		r = self.belongs_to.filter(entities__action = action)
+		return r 
+
 	def __unicode__(self):
 		return self.name
 
@@ -38,6 +42,34 @@ class Entity(models.Model):
 	relationships = models.ManyToManyField("self", through = "Relationship",related_name= "related_to",null = True,
 											symmetrical=False)
 
+	def add_relationship(self,entity,status):
+		r = Relationship.objects.get_or_create(from_entity = self,to_entity= entity,status = status)[0]
+		return r
+
+	def remove_relationship(self,entity,status):
+		r = Relationship.objects.get(from_entity = self,to_entity= entity,status = status)
+		r.delete()
+		return True 
+
+	def get_following(self,status):
+		r = self.relationships.filter(to_entities__status = status)
+		return r 
+
+	def get_follower(self,status):
+		r = self.related_to.filter(from_entities__status = status)
+		return r
+
+	def add_collection(self,product,action):
+		r = Collection.objects.get_or_create(entity = self, product = product,action = action)[0]
+		return r 
+	def remove_collection(self,product,status):
+		r = Collection.objects.get_or_create(entity = self, product = product,action = action)[0]		
+		r.delete()
+		return True 
+
+	def get_collection(self,status):
+		r = self.collections.filter(products__action = status)
+		return r 
 
 	def __unicode__(self):
 		return self.name
@@ -71,10 +103,9 @@ class Relationship(models.Model):
 	to_entity = models.ForeignKey(Entity,related_name = 'to_entities')
 	status = models.IntegerField(choices= RELATIONSHIP_STATUSES)
 
-
-
-
-
 #class ProductAttributes(models.Model)	
 #	attribute_category = models.CharField(max_length=128)
 #	attribute_value = models.IntegerField(max_length=128)
+
+
+
